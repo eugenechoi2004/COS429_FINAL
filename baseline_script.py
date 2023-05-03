@@ -17,8 +17,10 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    svhn_loader = torch.utils.data.DataLoader(svhn_train, batch_size = 32, shuffle = True)
-    mnist_loader = torch.utils.data.DataLoader(mnist_test, batch_size = 32, shuffle = False)
+    batch_size = 32
+
+    svhn_loader = torch.utils.data.DataLoader(svhn_train, batch_size = batch_size, shuffle = True)
+    mnist_loader = torch.utils.data.DataLoader(mnist_test, batch_size = batch_size, shuffle = False)
 
     # Setup Model
     model = mobilenet_v2(weights = None)
@@ -45,6 +47,10 @@ def main():
             # Forward pass
             outputs = model(inputs)
 
+            # Calculate Accuracy
+            predictions = (torch.max(torch.exp(outputs), 1)[1]).data.cpu().numpy()
+            accuracy = np.sum(np.array(labels) == np.array(predictions)) / batch_size
+
             # Compute loss
             loss = loss_func(outputs, labels)
 
@@ -56,7 +62,7 @@ def main():
 
             # Print statistics
             if i % 100 == 0:
-                print(f'Epoch {epoch}/{num_epochs}, Step {i}/{len(svhn_loader)}, Loss: {loss.item():.4f}')
+                print(f'Epoch {epoch+1}/{num_epochs}, Step {i}/{len(svhn_loader)}, Loss: {loss.item():.4f}, Accuracy: {accuracy}')
         
     prediction_labels = []
     truth_labels = []
