@@ -1,3 +1,4 @@
+# Edited from ApprenticeZ/pytorch_dataloader_example.py
 import numpy as np
 from torchvision.datasets import MNIST, SVHN
 from torchvision import transforms
