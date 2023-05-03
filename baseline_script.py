@@ -76,6 +76,10 @@ def main():
         
         labels = labels.data.cpu().numpy()
         truth_labels.extend(labels) # Save Truth
+    
+    accuracy = np.sum(np.array(prediction_labels) == np.array(truth_labels)) / mnist_test.size(dim=0)
+    print(f'Test Accuracy: {accuracy}')
+        
 
     # Confusion Matrix From:
     # https://christianbernecker.medium.com/how-to-create-a-confusion-matrix-in-pytorch-38d06a7f04b7
