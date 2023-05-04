@@ -1,4 +1,3 @@
-from data import data_utils as data
 from torchvision.models.mobilenet import mobilenet_v2
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
@@ -11,8 +10,9 @@ import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import cv2
-from PIL import Image
+import sys
+sys.path.insert(0,"..")
+from data import data_utils as data
 
 def generate_confusion_matrix(name, truth_labels, prediction_labels):
     # Confusion Matrix From:
