@@ -1,5 +1,8 @@
 from data import data_utils as data
 from torchvision.models.mobilenet import mobilenet_v2
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+from pytorch_grad_cam.utils.image import show_cam_on_image
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -8,6 +11,8 @@ import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
+from PIL import Image
 
 def generate_confusion_matrix(name, truth_labels, prediction_labels):
     # Confusion Matrix From:
@@ -36,9 +41,9 @@ def main():
 
     batch_size = 32
 
-    svhn_train_loader = torch.utils.data.DataLoader(svhn_train, batch_size = batch_size, shuffle = True, num_workers = 4)
-    svhn_test_loader = torch.utils.data.DataLoader(svhn_test, batch_size = batch_size, shuffle = False, num_workers = 4)
-    mnist_loader = torch.utils.data.DataLoader(mnist_test, batch_size = batch_size, shuffle = False, num_workers = 4)
+    svhn_train_loader = torch.utils.data.DataLoader(svhn_train, batch_size = batch_size, shuffle = True)
+    svhn_test_loader = torch.utils.data.DataLoader(svhn_test, batch_size = batch_size, shuffle = False)
+    mnist_loader = torch.utils.data.DataLoader(mnist_test, batch_size = batch_size, shuffle = False)
 
     # Setup Model
     model = mobilenet_v2(weights = None)
@@ -50,10 +55,16 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr = .01)
     loss_func = nn.CrossEntropyLoss()
 
-    num_epochs = 10
+    num_epochs = 8
+
+    loss_epochs = []
+    accuracy_epochs = []
 
     # Train the Model
     for epoch in range(num_epochs):
+        model.train()
+        loss = 0
+        accuracy = 0
         for i, (inputs, labels) in enumerate(svhn_train_loader):
             # Move inputs and labels to device
             inputs, labels = inputs.to(device), labels.to(device)
@@ -80,7 +91,9 @@ def main():
             # Print statistics
             if i % 100 == 0:
                 print(f'Epoch {epoch+1}/{num_epochs}, Step {i}/{len(svhn_train_loader)}, Loss: {loss.item():.4f}, Accuracy: {accuracy}')
-
+        loss_epochs.append(loss)  
+        accuracy_epochs.append(accuracy)
+    
     prediction_labels = []
     truth_labels = []
 
@@ -116,6 +129,31 @@ def main():
     print(f'MNIST Test Accuracy: {accuracy}')
 
     generate_confusion_matrix("mnist_confusion", truth_labels, prediction_labels)
+
+     # GradCam
+    #cam = GradCAM(model = model, target_layers = model.features[-1])
+    #imgs, labels = next(iter(mnist_loader))
+
+    #grayscale_cam = cam(input_tensor=imgs[0].unsqueeze(0), targets=None)    
+
+    # In this example grayscale_cam has only one image in the batch:
+    #grayscale_cam = grayscale_cam[0, :]
+
+    #temp = imgs[0].detach().cpu().numpy()
+    #temp = np.transpose(temp, (1,2,0))
+
+   # cam_image = show_cam_on_image(temp, grayscale_cam, use_rgb = True)
+
+    #plt.imshow(cam_image[:, :, 0])
+   # plt.show()
+   # plt.imshow(cam_image[:, :, 1])
+   # plt.show()
+   # plt.imshow(cam_image[:, :, 2])
+   # plt.show()
+
+    torch.save(model.state_dict(), "trained_baseline_model")
+    print(loss_epochs)
+    print(accuracy_epochs)
         
 
 if __name__ == '__main__':
