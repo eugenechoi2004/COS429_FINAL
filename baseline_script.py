@@ -36,9 +36,9 @@ def main():
 
     batch_size = 32
 
-    svhn_train_loader = torch.utils.data.DataLoader(svhn_train, batch_size = batch_size, shuffle = True)
-    svhn_test_loader = torch.utils.data.DataLoader(svhn_test, batch_size = batch_size, shuffle = True)
-    mnist_loader = torch.utils.data.DataLoader(mnist_test, batch_size = batch_size, shuffle = False)
+    svhn_train_loader = torch.utils.data.DataLoader(svhn_train, batch_size = batch_size, shuffle = True, num_workers = 4)
+    svhn_test_loader = torch.utils.data.DataLoader(svhn_test, batch_size = batch_size, shuffle = False, num_workers = 4)
+    mnist_loader = torch.utils.data.DataLoader(mnist_test, batch_size = batch_size, shuffle = False, num_workers = 4)
 
     # Setup Model
     model = mobilenet_v2(weights = None)
@@ -54,7 +54,6 @@ def main():
 
     # Train the Model
     for epoch in range(num_epochs):
-        model.train()
         for i, (inputs, labels) in enumerate(svhn_train_loader):
             # Move inputs and labels to device
             inputs, labels = inputs.to(device), labels.to(device)
