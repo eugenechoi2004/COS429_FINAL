@@ -2,18 +2,15 @@
 import numpy as np
 from torchvision.datasets import MNIST, SVHN
 from torchvision import transforms
-import torch
 
 
 def normalize(data_tensor):
    '''re-scale image values to [-1, 1]'''
    return (data_tensor / 255.) * 2. - 1.
 
-
 def tile_image(image):
-   '''duplicate along channel axis'''
-   return image.repeat(3,1,1)
-
+    '''duplicate along channel axis'''
+    return image.repeat(3,1,1)
 
 def get_mnist():
    transform_list = [transforms.ToTensor(), transforms.Lambda(lambda x: normalize(x))]
@@ -23,7 +20,7 @@ def get_mnist():
            transforms.ToPILImage(),
            transforms.Resize(32),
            transforms.ToTensor(),
-           transforms.Lambda(lambda x: tile_image(x))
+           transforms.Lambda(lambda x: tile_image(x)),
            ]))
    mnist_test = MNIST(root="data/<root_path>", train = False,download = True,
        transform=transforms.Compose(transform_list+[
